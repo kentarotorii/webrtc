@@ -1,0 +1,24 @@
+<%= form_for([consultation, report], url: choose_new_or_edit, remote: true) do |f| %>
+
+  <% if report.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= report.errors.count %>件のエラーがあります。</h2>
+      <ul>
+      <% report.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= f.hidden_field :consultation_id %>
+
+  <div class="field">
+    <!-- <%= f.text_area :content, :rows => "6", placeholder: "新しいレポート", class: "form-control"%>-->
+    <%= f.text_area :content, :rows => "4", :value => report.content, placeholder: "新しいレポート", class: "form-control"%>
+  </div>
+
+  <div class="actions">
+    <p class="right"><%= f.submit "登録", class: "btn btn-primary"%></p>
+  </div>
+<% end %>

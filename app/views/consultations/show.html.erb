@@ -1,0 +1,255 @@
+<div class="container">
+  <p id="notice"><%= notice %></p>
+
+  <% event = @consultation.event %>
+  <%= hidden_field_tag :usertype, current_user.type %>
+
+  <div class="row">
+    <div class="col-sm-9"><!--左側-->
+
+      <div class="row">
+        <div class="col-sm-9 videowrapper" id="video-container"><!-- 相手側の動画もしくは録画動画のエリア -->
+          <p class="videoinfo left"><!-- 相談の情報 -->
+            相談者：<%= User.find(@consultation.client_id).name + 'さん' %><br>
+            相談の件名：<%= @consultation.event.title %><br>
+            <% if  @consultation.event.actual_start? && @consultation.event.actual_end? %>
+              相談日時：<%= @consultation.event.actual_start.strftime('%Y年%m月%d日 %H:%M')%>〜<%=@consultation.event.actual_end.strftime('%H:%M')%>
+            <% end %>
+          </p>
+          <p><%= video_tag @consultation.data.url, id: "videodata", autoplay: false, controls: true, class: "their-video"%></p><!--consultation.dataの動画エリア、通話時はこちらがhidden -->
+          <p><%= video_tag id: "their-video", autoplay: true, controls: false, style: "display:none", class: "their-video"%></p><!--相手側の動画エリア、通話時はこちらがshown -->
+        </div>
+
+        <div class="col-sm-3" id="video-container"><!-- 自分側の動画のエリア -->
+          <video id="my-video" muted="true" autoplay class="my-video"></video>
+          <p>
+            <%= render partial: 'consultations/roomnumber_form', locals: { consultation: @consultation} %><!--入室ボタン-->
+            <%= render partial: 'consultations/uploaddata_form', locals: { consultation: @consultation} %><!--データ登録ボタン,非表示にしている-->
+            <%= render partial: 'events/timestamp_form', locals: { event: event, consultation: @consultation} %><!--開始・終了日時記録ぼたん,非表示にしている-->
+          </p>
+          <form id="make-call">
+            <p><button href="#" class="btn btn-primary btn-block" type="submit">Call</button></p>
+            <p><%= text_field_tag 'callto-id', @consultation.roomnumber, placeholder: "Call user id...", class: "form-control" %></p>
+          </form>
+          <!-- CSSでデフォルトでdisplay: noneとしている。相手と繋がったら（call.on('stream'...）showが実行される -->
+          <p><button id="end-call" class="btn btn-primary btn-block">退室</button></p>
+          <p>Your id: <span id="my-id">...</span></p>
+
+        </div>
+      </div>
+      <div class "row">
+        <div class="report-text"><!-- 相談の情報 -->
+          <p class="left"><strong>相談の内容：</strong><%= @consultation.memo %></p>
+        </div>
+      </div>
+      <div class "row">
+        <% if current_user.type == 'Consultant' %>
+          <!-- カウンセラーのレポート欄 -->
+          <%= render partial: 'reports/form', locals: { report: @report, consultation: @consultation } %>
+          <div id="reports_area">
+            <%= render partial: 'reports/index', locals: { reports: @reports, consultation: @consultation } %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="col-sm-3 sidebar hidden-xs"><!-- 右側の会話データエリア-->
+      <div class="sticky" style="border-bottom:1px solid #fff">
+        <%= render partial: 'comments/form', locals: { comment: @comment, consultation: @consultation } %>
+        <div class="row">
+          <div class="col-sm-6 left">相談者</div>
+          <div class="col-sm-6 right">カウンセラー</div>
+        </div>
+      </div>
+      <div id="comments_area">
+        <%= render partial: 'comments/index', locals: { comments: @comments, consultation: @consultation } %>
+      </div>
+      <!--<input type="button" onClick="vr_function();" value="音認開始">-->
+    </div>
+  </div>
+</div>
+
+<script>
+/////WebRTC関連/////
+var roomNumber;//下方のpeer.on('open',...でpeer.idをroomNumberに設定
+var recordedData;
+
+function roomnumber(){//DBのconsultation.roomnumberにroomNumberを書き込む。_roomnumber_formのinputタグのonclickで実行される。
+  document.getElementById('consultation_roomnumber').value = roomNumber;//_roomnumber_formのhidden_field:consultation_roomnumberにroomNumberをセット
+  $("#set_roomnumber").submit();//_roomnumber_formのinputタグをsubmitする→enterroom_consultation_path(update)→consultation.roomnumberをDBにセット
+}
+
+function uploaddata(){//DBのconsultation.dataにrecordedDataを書き込む。_uploaddata_formのinputタグのonclickで実行される。
+  //recordedData(base64)を以下のrecorder.ondataavailableで作成し、_uploaddata_formのhidden_field_tag :urlにセットしている。
+  $("#set_uploaddata").submit();//_uploaddata_formのinputタグをsubmitする→enterroom_consultation_path(update)→consultation.roomnumberをDBにセット
+}
+
+$(window).on('turbolinks:load', function() {
+  'use strict';
+
+  let localStream = null;
+  let theirStream = null;
+  let peer = null;
+  let existingCall = null;
+
+  let localVideo =  document.getElementById('local_video');
+  //let playbackVideo =  document.getElementById('playback_video');
+  //let anchor = document.getElementById('downloadlink');
+  let recorder =  null;
+  let blobUrl = null;
+
+  let isConsultant = false;//このページを開いているユーザがConsultantか？
+  if($('#usertype').val() == 'Consultant'){
+    isConsultant = true;
+  }
+
+  navigator.mediaDevices.getUserMedia({video: true, audio: true})
+    .then(function (stream) {
+        // Success
+        $('#my-video').get(0).srcObject = stream;
+        localStream = stream;
+    }).catch(function (error) {
+    // Error
+    console.error('mediaDevice.getUserMedia() error:', error);
+    return;
+  });
+
+  peer = new Peer({
+    key: '439f50de-da89-4848-b13b-41ca198ba8d9',
+    debug: 3
+  });
+
+  peer.on('open', function(){
+      $('#my-id').text(peer.id);//単に表示しているだけ
+      roomNumber = peer.id;
+  });
+
+  peer.on('error', function(err){
+      alert(err.message);
+  });
+
+  peer.on('close', function(){
+  });
+
+  peer.on('disconnected', function(){
+  });
+
+  $('#make-call').submit(function(e){
+      e.preventDefault();
+      const call = peer.call($('#callto-id').val(), localStream);
+      setupCallEventHandlers(call);
+  });
+
+  $('#end-call').click(function(){
+    existingCall.close();//通話切断
+    //$('#their-video').css('background-color','#eee');
+    document.getElementById('their-video').style.backgroundColor = '#eee';
+    if(isConsultant){//Consultant側のクライアントでのみ実行
+      stopRecord();//録画終了
+      //通話を切断した時刻をConsultation(Event)の終了日時とし、events/timestamp_formのf.hidden_field :actual_endにセットする
+      var now = new Date();
+      document.getElementById('event_actual_end').value = now;
+      $("#set_timestamp").submit();//events/timestamp_formをsubmitし終了日時をDBに登録する
+    }
+  });
+
+  peer.on('call', function(call){
+    call.answer(localStream);
+    setupCallEventHandlers(call);
+  });
+
+  function setupCallEventHandlers(call){
+    if (existingCall) {
+        existingCall.close();
+    };
+
+    existingCall = call;
+
+    call.on('stream', function(stream){
+      addVideo(call,stream);
+      setupEndCallUI();
+      theirStream = stream; //相手の動画
+
+      if(isConsultant){//Consultant側のクライアントでのみ実行
+        //通話状態になった時刻をConsultation(Event)の開始日時とし、events/timestamp_formのf.hidden_field :actual_startにセットする
+        var now = new Date();
+        document.getElementById('event_actual_start').value = now;//events/timestamp_formをsubmitし開始日時をDBに登録する
+        startRecord();//録画を開始する
+      }
+      vr_function();//Consultant、Client共に音声認識を開始する（関数はevents/_form.htmlで定義）
+    });
+
+    call.on('close', function(){
+      removeVideo(call.remoteId);
+      setupMakeCallUI();
+    });
+  }
+
+  function addVideo(call,stream){
+    $('#videodata').hide();//consultation.data欄を非表示にして
+    $('#their-video').show();//通話中の相手動画欄を表示する
+    $('#their-video').get(0).srcObject = stream; //相手の動画
+  }
+
+  function removeVideo(peerId){
+    $('#'+peerId).remove();
+  }
+
+  function setupMakeCallUI(){
+    $('#make-call').show();
+    $('#end-call').hide();
+  }
+
+  function setupEndCallUI() {
+    $('#make-call').hide();
+    $('#end-call').show();
+  }
+
+  function startRecord(){
+    if (! theirStream) {
+      console.warn("no stream");
+      return;
+    }
+    if (recorder) {
+      console.warn("recorder already exist");
+      return;
+    }
+
+    recorder = new MediaRecorder(theirStream);
+    console.log("OK start recording");
+    //console.log(localStream);
+    recorder.ondataavailable = function(evt) {
+      console.log("data available, start playback");
+      var videoBlob = new Blob([evt.data], { type: evt.data.type });//録画データ
+      blobUrl = window.URL.createObjectURL(videoBlob);//録画データのblobUrl
+
+      $('#their-video').hide();//相手側動画欄を非表示にして
+      $('#videodata').show();//consultation.data欄を再表示
+      //$('#videodata').src = blobUrl;
+      document.getElementById('videodata').src = blobUrl;//メモリ上の録画データをvideodata領域にセット（上のjqueryだとうまく動かない）
+
+      //anchor.download = 'recorded.webm';//ファイル名
+      //anchor.href = blobUrl;
+
+      //録画データをbase64にしてから_uploaddata_formの#urlに渡す
+      var reader = new window.FileReader();
+      reader.readAsDataURL(videoBlob);
+      reader.onloadend = function() {
+        var base64data = reader.result;
+        base64data = base64data.split(',')[1];//これをしないと駄目
+        document.getElementById('url').value = base64data;//_uploaddata_formの#urlにデータをセット
+        $("#set_uploaddata").submit();//_uploaddata_formのinputタグをsubmitする→enterroom_consultation_path(update)→consultation.roomnumberをDBにセット
+
+      }
+    }
+    recorder.start();
+    console.log("start recording");
+  }
+
+  function stopRecord(){
+    if (recorder) {
+      recorder.stop();
+    }
+  }
+});
+</script>

@@ -1,0 +1,38 @@
+<div class="container">
+  <div class="wrapper col-md-8 col-md-offset-2 col-sm-10">
+    <h3>以下の内容で、送信する。</h3>
+
+    <%= form_for(@consultation) do |f| %>
+      <%= f.hidden_field :client_id%>
+      <%= f.hidden_field :consultant_id%>
+      <%= f.hidden_field :memo%>
+
+      <%= fields_for(@event) do |e| %>
+        <%= e.hidden_field :title%>
+        <%= e.hidden_field :user_id%>
+        <%= e.hidden_field :planed_start %>
+        <%= e.hidden_field :planed_end %>
+        <p>件名:<%= @event.title %></p>
+        <p>相談の内容:<%= @consultation.memo %></p>
+        <p>希望日時:<%= @event.planed_start.strftime('%Y年%m月%d日 %H:%M') %></p>
+      <% end %>
+      <%= f.submit "登録", class: 'btn btn-primary btn-block'%>
+    <% end %>
+
+
+    <%= form_for(@consultation, url: new_user_consultation_path(user_id: @consultation.consultant_id), method:'get') do |f| %>
+      <%= f.hidden_field :client_id%>
+      <%= f.hidden_field :consultant_id%>
+      <%= f.hidden_field :memo%>
+
+      <%= fields_for(@event) do |e| %>
+        <%= e.hidden_field :title%>
+        <%= e.hidden_field :user_id%>
+        <%= e.hidden_field :planed_start %>
+        <%= e.hidden_field :planed_end %>
+      <% end %>
+      <%= f.submit "戻る", name: 'back', class: 'btn btn-default btn-block' %>
+    <% end %>
+
+  </div>
+</div>

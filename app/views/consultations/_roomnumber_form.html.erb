@@ -1,0 +1,11 @@
+
+<div id="roomnumber_form">
+  <%= form_for(consultation, url: enterroom_consultation_path, html: {method: 'PUT'}, remote: true) do |f| %>
+    <%= f.hidden_field :id %>
+    <%= f.hidden_field :roomnumber%>
+    <%= f.hidden_field :consultant_id%>
+    <%= f.hidden_field :client_id%>
+    <!--<%= f.submit "入室", class: "btn btn-large btn-primary" %> --><!--f.submitだとonclickが使えないのでinputタグを直接書く -->
+    <input type="button" class="btn btn-primary btn-block" value="入室" id="set_roomnumber" onclick="roomnumber()">
+  <% end %>
+</div>

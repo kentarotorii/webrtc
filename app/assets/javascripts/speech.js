@@ -1,5 +1,5 @@
 
-var flag_speech = 0;
+/*var flag_speech = 0;
 
 function vr_function() {
     window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
@@ -43,3 +43,4 @@ function vr_function() {
     document.getElementById('status').innerHTML = "start";
     recognition.start();
 }
+*/

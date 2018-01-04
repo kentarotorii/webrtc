@@ -14,8 +14,12 @@
 //= require jquery_ujs
 //= require twitter/bootstrap
 //= require turbolinks
+//= require moment
+//= require moment/ja.js
+//= require bootstrap-datetimepicker
 //= require_tree .
 
+/*
 $(window).on('turbolinks:load', function() {
   $('#mybutton').on('click', function(){
        console.log('hello world! from jQuery');
@@ -45,6 +49,7 @@ $(window).on('turbolinks:load', function() {
 
   peer.on('open', function(){
       $('#my-id').text(peer.id);
+      roomNumber = peer.id;
   });
 
   peer.on('error', function(err){
@@ -83,12 +88,18 @@ $(window).on('turbolinks:load', function() {
           addVideo(call,stream);
           setupEndCallUI();
           $('#their-id').text(call.remoteId);
-          theirStream = stream; /*tmp*/
+          theirStream = stream;
       });
       call.on('close', function(){
           removeVideo(call.remoteId);
           setupMakeCallUI();
       });
+  }
+
+  function roomnumber(){
+    $('#consultation_roomnumber').value = roomNumber;
+    alert($('#consultation_roomnumber').value);
+    $("#button1").submit();
   }
 
   function addVideo(call,stream){
@@ -108,7 +119,7 @@ $(window).on('turbolinks:load', function() {
       $('#make-call').hide();
       $('#end-call').show();
   }
-  /*------------------------------------*/
+
   let localVideo =  document.getElementById('local_video');
   let playbackVideo =  document.getElementById('playback_video');
   let anchor = document.getElementById('downloadlink');
@@ -165,6 +176,5 @@ $(window).on('turbolinks:load', function() {
     playbackVideo.play();
     }
   });
-  /*------------------------------------*/
 
-});
+});*/

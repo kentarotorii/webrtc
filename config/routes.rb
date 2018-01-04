@@ -1,6 +1,43 @@
 Rails.application.routes.draw do
-  devise_for :users
-  root 'top#index'
+
+  #root 'top#index'
+
+  devise_for :users, controllers: {
+    registrations: "users/registrations",
+  }
+
+  devise_scope :user do
+    authenticated :user do
+      root :to => 'consultations#index', as: :authenticated_root
+    end
+    unauthenticated :user do
+      root :to => 'devise/sessions#new', as: :unauthenticated_root
+    end
+  end
+
+  resources :users do
+    resources :events ,only: [:index] do
+    end
+  end
+
+  resources :events ,only: [:index, :update]
+
+  resources :consultations do
+    resources :comments, :reports, :events;
+    post :confirm, on: :collection
+    put :enterroom, on: :member
+    put :dataupload, on: :member
+  end
+
+  resources :users, only: [:index, :show] do
+    resources :consultations do
+  #    resources :comments
+  #    post :confirm, on: :collection
+    end
+  end
+
+  resources :consultants, controller: :users
+  resources :clients, controller: :users
 
   if Rails.env.development?
     mount LetterOpenerWeb::Engine, at: "/letter_opener"

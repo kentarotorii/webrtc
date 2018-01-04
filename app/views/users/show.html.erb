@@ -1,0 +1,29 @@
+<div class="container">
+
+<p id="notice"><%= notice %></p>
+<% if @user.type == 'Client' %>
+  <h3>相談者の情報</h3>
+<% elsif @user.type == 'Consultant'%>
+  <h3>カウンセラーの情報</h3>
+<% end %>
+<br>
+
+<div class="child row">
+  <div class="col-md-6 col-md-offset-3 col-sm-10 col-sm-offset-1">
+      <div class="row">
+        <div class="left col-sm-8 col-sm-offset-0">
+          <p><strong>氏名</strong></p>
+          <p><%= @user.name %></p>
+          <p><strong>プロフィール</strong></p>
+          <p><%= simple_format(@user.profile) %></p>
+        </div>
+        <div class="col-sm-4 col-sm-offset-0">
+          <p class="users"><%= profile_img(@user) %></p>
+        </div>
+      </div>
+      <% if @user.type == 'Consultant' %>
+        <%= link_to @user.name+'さんに相談する', new_user_consultation_path(@user), class: 'btn btn-primary btn-block' %>
+      <% end %>
+  </div>
+</div>
+</div>

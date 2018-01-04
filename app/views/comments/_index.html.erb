@@ -1,0 +1,23 @@
+<ul style="padding-left: 0px !important">
+  <div class="line-bc">
+    <% comments.each do |comment| %>
+      <% unless comment.id.nil? %>
+          <%if comment.user.type == 'Client' %>
+            <div class="balloon6">
+              <div class="chatting">
+                <div class="says">
+                  <p><%= comment.content %></p>
+                </div>
+              </div>
+            </div>
+          <% else %>
+            <div class="chatting">
+              <div class="mycomment">
+                <p><%= comment.content %></p>
+              </div>
+            </div>
+          <% end %>
+      <% end %>
+    <% end %>
+  </div>
+</ul>

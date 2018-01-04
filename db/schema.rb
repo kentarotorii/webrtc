@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171219104650) do
+ActiveRecord::Schema.define(version: 20180101044854) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,27 +21,50 @@ ActiveRecord::Schema.define(version: 20171219104650) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "comments", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "consultation_id"
+    t.text     "content"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "comments", ["consultation_id"], name: "index_comments_on_consultation_id", using: :btree
+  add_index "comments", ["user_id"], name: "index_comments_on_user_id", using: :btree
+
   create_table "consultations", force: :cascade do |t|
-    t.string   "event_id"
+    t.integer  "event_id"
     t.text     "memo"
     t.string   "data"
-    t.string   "client_id"
-    t.string   "consultant_id"
+    t.integer  "client_id"
+    t.integer  "consultant_id"
     t.boolean  "accepted",      default: false
     t.datetime "created_at",                    null: false
     t.datetime "updated_at",                    null: false
+    t.string   "roomnumber"
   end
 
   create_table "events", force: :cascade do |t|
     t.string   "title"
-    t.string   "user_id"
-    t.date     "planed_start"
-    t.date     "planed_end"
-    t.date     "start"
-    t.date     "end"
+    t.integer  "user_id"
+    t.datetime "planed_start"
+    t.datetime "planed_end"
+    t.datetime "actual_start"
+    t.datetime "actual_end"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
   end
+
+  create_table "reports", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "consultation_id"
+    t.text     "content"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "reports", ["consultation_id"], name: "index_reports_on_consultation_id", using: :btree
+  add_index "reports", ["user_id"], name: "index_reports_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  default: "", null: false
@@ -57,10 +80,22 @@ ActiveRecord::Schema.define(version: 20171219104650) do
     t.datetime "created_at",                          null: false
     t.datetime "updated_at",                          null: false
     t.string   "name"
+    t.string   "user_type"
+    t.string   "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
+    t.string   "unconfirmed_email"
+    t.string   "avatar"
     t.string   "type"
+    t.string   "profile"
   end
 
+  add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
 
+  add_foreign_key "comments", "consultations"
+  add_foreign_key "comments", "users"
+  add_foreign_key "reports", "consultations"
+  add_foreign_key "reports", "users"
 end

@@ -1,2 +1,106 @@
-<h1>Consultations#index</h1>
-<p>Find me in app/views/consultations/index.html.erb</p>
+<div class="container col-sm-10 col-sm-offset-1 col-xs-8 col-xs-offset-2">
+  <p class="flash"><%= notice %></p>
+  <% if current_user.type == 'Client' %>
+    <h3>あなたの相談</h3>
+  <% elsif current_user.type == 'Consultant'%>
+    <h3>あなたへの相談</h3>
+  <% end %>
+  <br>
+
+  <div class="subsection">今日の相談</div>
+
+  <div class="row">
+    <div class="col-xs-2">件名</div>
+    <div class="col-xs-4">内容</div>
+    <div class="col-xs-2">
+      <% if current_user.type == 'Client' %>
+        カウンセラー
+      <% elsif current_user.type == 'Consultant'%>
+        相談者
+      <% end %>
+    </div>
+    <div class="col-xs-4">相談日時</div>
+  </div>
+
+  <% @consultations.each do |consultation| %>
+    <div class="row">
+      <hr>
+      <div class="col-xs-2"><%= link_to consultation.event.title.truncate(20), consultation_path(consultation) %></div>
+      <div class="col-xs-4"><%= consultation.memo.truncate(40) %></div>
+      <div class="col-xs-2">
+        <% if current_user.type == 'Client' %>
+          <%= link_to consultation.consultant.name, user_path(consultation.consultant) %>
+        <% elsif current_user.type == 'Consultant'%>
+          <%= link_to consultation.client.name, user_path(consultation.client) %>
+        <% end %>
+      </div>
+      <div class="col-xs-4"><%= consultation.event.planed_start.strftime("%Y年%m月%d日 %H時%M分") %></div>
+    </div>
+  <% end %>
+
+  <br>
+  <div class="subsection">明日以降の相談</div>
+
+  <div class="row">
+    <div class="col-xs-2">件名</div>
+    <div class="col-xs-4">内容</div>
+    <div class="col-xs-2">
+      <% if current_user.type == 'Client' %>
+        カウンセラー
+      <% elsif current_user.type == 'Consultant'%>
+        相談者
+      <% end %>
+    </div>
+    <div class="col-xs-4">相談日時</div>
+  </div>
+
+  <% @consultations_future.each do |consultation_future| %>
+    <div class="row">
+      <hr>
+      <div class="col-xs-2"><%= link_to consultation_future.event.title.truncate(20), consultation_path(consultation_future) %></div>
+      <div class="col-xs-4"><%= consultation_future.memo.truncate(40) %></div>
+      <div class="col-xs-2">
+        <% if current_user.type == 'Client' %>
+          <%= link_to consultation_future.consultant.name, user_path(consultation_future.consultant) %>
+        <% elsif current_user.type == 'Consultant'%>
+          <%= link_to consultation_future.client.name, user_path(consultation_future.client) %>
+        <% end %>
+      </div>
+      <div class="col-xs-4"><%= consultation_future.event.planed_start.strftime("%Y年%m月%d日 %H時%M分") %></div>
+    </div>
+  <% end %>
+  <br>
+  <div class="subsection">これまでの相談</div>
+
+  <div class="row">
+    <div class="col-xs-2">件名</div>
+    <div class="col-xs-4">内容</div>
+    <div class="col-xs-2">
+      <% if current_user.type == 'Client' %>
+        カウンセラー
+      <% elsif current_user.type == 'Consultant'%>
+        相談者
+      <% end %>
+    </div>
+    <div class="col-xs-4">相談日時</div>
+  </div>
+
+  <% @consultations_past.each do |consultation_past| %>
+    <div class="row">
+      <hr>
+      <div class="col-xs-2"><%= link_to consultation_past.event.title.truncate(20), consultation_path(consultation_past) %></div>
+      <div class="col-xs-4"><%= consultation_past.memo.truncate(40) %></div>
+      <div class="col-xs-2">
+        <% if current_user.type == 'Client' %>
+          <%= link_to consultation_past.consultant.name, user_path(consultation_past.consultant) %>
+        <% elsif current_user.type == 'Consultant'%>
+          <%= link_to consultation_past.client.name, user_path(consultation_past.client) %>
+        <% end %>
+      </div>
+      <div class="col-xs-4"><%= consultation_past.event.planed_start.strftime("%Y年%m月%d日 %H時%M分") %></div>
+    </div>
+  <% end %>
+
+  <%= paginate(@consultations_past) %>
+
+</div>

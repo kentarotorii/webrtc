@@ -1,0 +1,53 @@
+<%= form_for([@user, @consultation], url: {action: 'confirm'}) do |f| %>
+  <% if @consultation.errors.any? %>
+    <div id="error_explanation">
+      <h4 style="color: blue"><%= @consultation.errors.count %> 個のエラーがあり保存できませんでした。</h4>
+      <ul style="color: blue">
+        <% @consultation.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if @event.errors.any? %>
+    <div id="error_explanation">
+      <h4 style="color: blue"><%= @event.errors.count %> 個のエラーがあり保存できませんでした。</h4>
+      <ul style="color: blue">
+        <% @event.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= f.hidden_field :client_id, :value => current_user.id %>
+  <%= f.hidden_field :consultant_id, :value => @user.id %>
+
+  <%= fields_for(@event) do |e| %>
+    <%= e.hidden_field :user_id, :value => @user.id %>
+    <%= e.hidden_field :planed_end %>
+
+    <div class="field">
+      <%= e.label :件名 %>
+      <%= e.text_field :title, class: 'form-control' %>
+    </div>
+
+    <div class="field">
+      <%= f.label :相談の内容 %>
+      <%= f.text_area :memo, :rows => "6", class: 'form-control' %>
+    </div>
+
+    <label for="">希望日時</label>
+    <div class='input-group date datetimepicker'>
+      <%= e.text_field :planed_start, class: 'form-control' %>
+      <span class="input-group-addon">
+        <span class="fa fa-calendar"></span>
+      </span>
+    </div>
+  <% end %>
+
+  <%= f.submit '登録', class: 'btn btn-primary btn-block' %>
+<% end %>
+
+<%= link_to "あなたの相談一覧画面にもどる", consultations_path %>

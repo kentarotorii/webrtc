@@ -1,0 +1,9 @@
+<div id="timestamp_form">
+  <%= form_for([consultation, event], remote: true) do |f| %>
+    <%= f.hidden_field :id %>
+    <%= f.hidden_field :actual_start%>
+    <%= f.hidden_field :actual_end%>
+    <!--<%= f.submit "入室", class: "btn btn-large btn-primary" %> --><!--f.submitだとonclickが使えないのでinputタグを直接書く -->
+    <input type="button" class="btn btn-primary btn-block invisible" id="set_timestamp">
+  <% end %>
+</div>

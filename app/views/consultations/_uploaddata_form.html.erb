@@ -1,0 +1,9 @@
+<div id="uploaddata_form">
+  <%= form_for(consultation, url: dataupload_consultation_path, html: {method: 'PUT'}, remote: true) do |f| %>
+    <%= f.hidden_field :id %>
+    <%= hidden_field_tag :url%>
+    <!--<%= f.submit '投稿', class: 'btn btn-primary btn-block' %>-->
+    <!--f.submitだとonclickが使えないのでinputタグを直接書く -->
+    <input type="button" class="btn btn-primary btn-block invisible" value="データ登録" id="set_uploaddata" onclick="uploaddata()">
+  <% end %>
+</div>

@@ -85,3 +85,7 @@ gem 'fog'
 
 gem 'dotenv-rails'
 gem 'unicorn'
+
+gem 'momentjs-rails'
+gem 'bootstrap3-datetimepicker-rails'
+gem 'fullcalendar-rails'

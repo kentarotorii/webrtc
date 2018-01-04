@@ -1,0 +1,22 @@
+<div class="container">
+  <% if current_user.type == 'Client' %>
+    <h3>カウンセラー</h3>
+  <% elsif current_user.type == 'Consultant'%>
+    <h3>相談者</h3>
+  <% end %>
+  <br>
+
+  <% @users.each do |user| %>
+    <div class="users left col-sm-3 col-xs-6 ">
+      <% if user.id != current_user.id %>
+        <p><%= profile_img(user) %></p>
+        <div>
+          <%= link_to user.name, user %>
+          <% unless user.profile.blank? %>
+            <%= simple_format(user.profile.truncate(40)) %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,2 @@
+$("#comments_area").html("<%= j(render 'comments/index', { comments: @comment.consultation.comments.order('id DESC'), consultation: @comment.consultation }) %>")
+$('#comment_content').val('')
