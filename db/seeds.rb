@@ -8,7 +8,6 @@
 email = "consultant1@sample.com"
 password = "password"
 name = Faker::Name.name
-uid = User.create_unique_string
 User.create!(email: email,
                password: password,
                password_confirmation: password,
@@ -22,7 +21,6 @@ User.create!(email: email,
 email = "client1@sample.com"
 password = "password"
 name = Faker::Name.name
-uid = User.create_unique_string
 User.create!(email: email,
               password: password,
               password_confirmation: password,
@@ -37,7 +35,6 @@ User.create!(email: email,
   email = Faker::Internet.email
   password = "password"
   name = Faker::Name.name
-  uid = User.create_unique_string
   User.create!(email: email,
                password: password,
                password_confirmation: password,
@@ -53,7 +50,6 @@ end
   email = Faker::Internet.email
   password = "password"
   name = Faker::Name.name
-  uid = User.create_unique_string
   User.create!(email: email,
                password: password,
                password_confirmation: password,
