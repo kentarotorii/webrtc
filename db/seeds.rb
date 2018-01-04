@@ -5,3 +5,62 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
+email = "consultant1@sample.com"
+password = "password"
+name = Faker::Name.name
+uid = User.create_unique_string
+User.create!(email: email,
+               password: password,
+               password_confirmation: password,
+               name: name,
+               confirmed_at: Time.now,
+               confirmation_sent_at: Time.now,
+               type: 'Consultant'
+               uid: uid
+               )
+
+email = "client1@sample.com"
+password = "password"
+name = Faker::Name.name
+uid = User.create_unique_string
+User.create!(email: email,
+              password: password,
+              password_confirmation: password,
+              name: name,
+              confirmed_at: Time.now,
+              confirmation_sent_at: Time.now,
+              type: 'Client'
+              uid: uid
+              )
+              
+9.times do |n|
+  email = Faker::Internet.email
+  password = "password"
+  name = Faker::Name.name
+  uid = User.create_unique_string
+  User.create!(email: email,
+               password: password,
+               password_confirmation: password,
+               name: name,
+               confirmed_at: Time.now,
+               confirmation_sent_at: Time.now,
+               type: 'Consultant'
+               uid: uid
+               )
+end
+
+9.times do |n|
+  email = Faker::Internet.email
+  password = "password"
+  name = Faker::Name.name
+  uid = User.create_unique_string
+  User.create!(email: email,
+               password: password,
+               password_confirmation: password,
+               name: name,
+               confirmed_at: Time.now,
+               confirmation_sent_at: Time.now,
+               type: 'Client'
+               uid: uid
+               )
+end
