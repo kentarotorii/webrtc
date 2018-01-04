@@ -15,8 +15,8 @@ User.create!(email: email,
                name: name,
                confirmed_at: Time.now,
                confirmation_sent_at: Time.now,
-               type: 'Consultant'
-               uid: uid
+               type: 'Consultant',
+               user_type: 'Consultant'
                )
 
 email = "client1@sample.com"
@@ -29,10 +29,10 @@ User.create!(email: email,
               name: name,
               confirmed_at: Time.now,
               confirmation_sent_at: Time.now,
-              type: 'Client'
-              uid: uid
+              type: 'Client',
+              user_type: 'Client'
               )
-              
+
 9.times do |n|
   email = Faker::Internet.email
   password = "password"
@@ -44,8 +44,8 @@ User.create!(email: email,
                name: name,
                confirmed_at: Time.now,
                confirmation_sent_at: Time.now,
-               type: 'Consultant'
-               uid: uid
+               type: 'Consultant',
+               user_type: 'Consultant'
                )
 end
 
@@ -60,7 +60,7 @@ end
                name: name,
                confirmed_at: Time.now,
                confirmation_sent_at: Time.now,
-               type: 'Client'
-               uid: uid
+               type: 'Client',
+               user_type: 'Client'
                )
 end
