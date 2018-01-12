@@ -255,6 +255,7 @@ $(window).on('turbolinks:load', function() {
     //theirStream.addTrack(localStream.getAudioTracks()[0]);
     //自分側の音声を、相手側音声に合成して記録する
     ///////////////////////////////////////////
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
     var audioContext = new AudioContext();
     var gain_node = audioContext.createGain();
     gain_node.gain.value = 1;
