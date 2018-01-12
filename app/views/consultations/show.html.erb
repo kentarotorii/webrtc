@@ -252,8 +252,7 @@ $(window).on('turbolinks:load', function() {
     }*/
 
     //自分側の音声を、相手側音声に合成して記録する
-    theirStream.addTrack(localStream.getAudioTracks()[0]);
-
+    //theirStream.addTrack(localStream.getAudioTracks()[0]);
 
     recorder = new MediaRecorder(theirStream);
     console.log("OK start recording");
