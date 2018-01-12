@@ -6,6 +6,7 @@ $(window).on('turbolinks:load', function(){
       next: "fa fa-arrow-right"
     }
   });
+
   $('.datetimepicker').datetimepicker({
     format : "YYYY/MM/DD HH:mm",
     minDate: 0,
@@ -18,4 +19,21 @@ $(window).on('turbolinks:load', function(){
       next: "fa fa-arrow-right"
     }
   });
+
+  $('#calendar').fullCalendar({
+    header: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'month,agendaWeek,agendaDay'
+    },
+    navLinks: true,
+    selectable: true,
+    selectHelper: true,
+    displayEventEnd: true,
+    timeFormat: 'HH:mm',
+    eventColor: '#6d8691',
+    events: 'events'
+    //editable: true
+  });
+
 });

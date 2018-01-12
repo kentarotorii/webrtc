@@ -1,1 +1,11 @@
-$("#new_report").html("<%= j(render partial: 'reports/form', locals: { report: @report, consultation: @consultation}) %>")
+//$("#new_report").html("<%= j(render partial: 'reports/form', locals: { consultation: @consultation, report: @report}) %>")
+//var form = $(".new_report")
+//form.attr('action',"/consultations/<%= @consultation.id %>/reports/<%= @report.id %>")
+
+//上のコードは、新規レポート入力欄にrenderするが、それを止めて、以下により各レポート欄（id="report.id"）を_formで置き換える
+id = <%= @report.id %>
+$("#"+id).html("<%= j(render partial: 'reports/form_edit', locals: { consultation: @consultation, report: @report}) %>")
+$("#"+id).attr('placeholder','');
+//var form = $("#"+id)
+//form.attr('action',"/consultations/<%= @consultation.id %>/reports/<%= @report.id %>")
+//新規レポート入力欄にrenderする場合と異なり、上2行がなくても大丈夫みたい

@@ -6,14 +6,28 @@
             <div class="balloon6">
               <div class="chatting">
                 <div class="says">
-                  <p><%= comment.content %></p>
+                  <span><%= comment.content %></span>
+
+                  <% if event.actual_start.present? && comment.speechstart.present? %>
+                    <% if event.actual_start <= comment.speechstart %>
+                      <span class="timeofcomment fa fa-play" onclick="videoseek()"> <%= ((comment.speechstart-event.actual_start)).to_i %></span>
+                    <% end %>
+                  <% end %>
+
                 </div>
               </div>
             </div>
           <% else %>
             <div class="chatting">
               <div class="mycomment">
-                <p><%= comment.content %></p>
+                <span><%= comment.content %></span>
+
+                <% if event.actual_start.present? && comment.speechstart.present? %>
+                  <% if event.actual_start <= comment.speechstart %>
+                    <span class="timeofcomment fa fa-play" onclick="videoseek()"> <%= ((comment.speechstart-event.actual_start)).to_i %></span>
+                  <% end %>
+                <% end %>
+
               </div>
             </div>
           <% end %>

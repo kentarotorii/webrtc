@@ -10,6 +10,7 @@ class ReportsController < ApplicationController
         format.js { render :index }
       else
         format.html { render :new }
+        format.js { render :index }
       end
     end
   end
@@ -32,6 +33,7 @@ class ReportsController < ApplicationController
   def update
     @report = Report.find(params[:id])
     @consultation = @report.consultation
+    @reports = @consultation.reports.order('id DESC')
     respond_to do |format|
       @report.update(report_params)
       format.html { redirect_to consultation_path(@consultation), notice: 'レポートを更新しました。' }
@@ -39,7 +41,15 @@ class ReportsController < ApplicationController
     end
   end
 
+  def cancel
+    @report = Report.find(params[:id])
+    @consultation = @report.consultation
+    respond_to do |format|
+      format.js { render :index }
+    end
+  end
+
   def report_params
-    params.require(:report).permit(:consultation_id, :content, :id)
+    params.require(:report).permit(:consultation_id, :content, :disclose, :id)
   end
 end

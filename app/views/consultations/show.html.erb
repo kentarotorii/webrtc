@@ -3,42 +3,48 @@
 
   <% event = @consultation.event %>
   <%= hidden_field_tag :usertype, current_user.type %>
+  <%= hidden_field_tag :actual_start, event.actual_start %>
 
   <div class="row">
     <div class="col-sm-9"><!--左側-->
 
       <div class="row">
-        <div class="col-sm-9 videowrapper" id="video-container"><!-- 相手側の動画もしくは録画動画のエリア -->
-          <p class="videoinfo left"><!-- 相談の情報 -->
+        <div class="col-sm-9 videowrapper" id="their-videocontainer"><!-- 相手側の動画もしくは録画動画のエリア -->
+          <div class="videoinfo left" style="margin:0px"><!-- 相談の情報 -->
             相談者：<%= User.find(@consultation.client_id).name + 'さん' %><br>
             相談の件名：<%= @consultation.event.title %><br>
             <% if  @consultation.event.actual_start? && @consultation.event.actual_end? %>
               相談日時：<%= @consultation.event.actual_start.strftime('%Y年%m月%d日 %H:%M')%>〜<%=@consultation.event.actual_end.strftime('%H:%M')%>
             <% end %>
-          </p>
-          <p><%= video_tag @consultation.data.url, id: "videodata", autoplay: false, controls: true, class: "their-video"%></p><!--consultation.dataの動画エリア、通話時はこちらがhidden -->
-          <p><%= video_tag id: "their-video", autoplay: true, controls: false, style: "display:none", class: "their-video"%></p><!--相手側の動画エリア、通話時はこちらがshown -->
+          </div>
+          <div><%= video_tag @consultation.data.url, id: "videodata", type: "video/webm", autoplay: false, controls: true, class: "their-video"%></div><!--consultation.dataの動画エリア、通話時はこちらがhidden -->
+          <div><%= video_tag id: "their-video", autoplay: true, controls: false, style: "display:none", class: "their-video"%></div><!--相手側の動画エリア、通話時はこちらがshown -->
         </div>
 
-        <div class="col-sm-3" id="video-container"><!-- 自分側の動画のエリア -->
+        <div class="col-sm-3" id="my-videocontainer"><!-- 自分側の動画のエリア -->
           <video id="my-video" muted="true" autoplay class="my-video"></video>
           <p>
-            <%= render partial: 'consultations/roomnumber_form', locals: { consultation: @consultation} %><!--入室ボタン-->
             <%= render partial: 'consultations/uploaddata_form', locals: { consultation: @consultation} %><!--データ登録ボタン,非表示にしている-->
             <%= render partial: 'events/timestamp_form', locals: { event: event, consultation: @consultation} %><!--開始・終了日時記録ぼたん,非表示にしている-->
           </p>
-          <form id="make-call">
-            <p><button href="#" class="btn btn-primary btn-block" type="submit">Call</button></p>
-            <p><%= text_field_tag 'callto-id', @consultation.roomnumber, placeholder: "Call user id...", class: "form-control" %></p>
-          </form>
+
+          <% if current_user.type == 'Consultant' %><!--入室ボタン-->
+            <%= render partial: 'consultations/roomnumber_form', locals: { consultation: @consultation} %>
+          <% elsif current_user.type == 'Client' %>
+            <form id="make-call">
+              <p><button href="#" class="btn btn-primary btn-block" type="submit">入室（相談者）</button></p>
+              <p><%= text_field_tag 'callto-id', @consultation.roomnumber, placeholder: "Call user id...", class: "form-control invisible" %></p>
+            </form>
+          <% end %>
+
           <!-- CSSでデフォルトでdisplay: noneとしている。相手と繋がったら（call.on('stream'...）showが実行される -->
           <p><button id="end-call" class="btn btn-primary btn-block">退室</button></p>
-          <p>Your id: <span id="my-id">...</span></p>
+          <p><span id="my-id" class="invisible">...</span></p>
 
         </div>
       </div>
       <div class "row">
-        <div class="report-text"><!-- 相談の情報 -->
+        <div class="report"><!-- 相談の情報 -->
           <p class="left"><strong>相談の内容：</strong><%= @consultation.memo %></p>
         </div>
       </div>
@@ -46,6 +52,11 @@
         <% if current_user.type == 'Consultant' %>
           <!-- カウンセラーのレポート欄 -->
           <%= render partial: 'reports/form', locals: { report: @report, consultation: @consultation } %>
+          <div id="reports_area">
+            <%= render partial: 'reports/index', locals: { reports: @reports, consultation: @consultation } %>
+          </div>
+        <% elsif current_user.type == 'Client' %>
+          <!-- 相談者に開示されたレポート欄 -->
           <div id="reports_area">
             <%= render partial: 'reports/index', locals: { reports: @reports, consultation: @consultation } %>
           </div>
@@ -62,12 +73,13 @@
         </div>
       </div>
       <div id="comments_area">
-        <%= render partial: 'comments/index', locals: { comments: @comments, consultation: @consultation } %>
+        <%= render partial: 'comments/index', locals: { comments: @comments, consultation: @consultation, event: event } %>
       </div>
       <!--<input type="button" onClick="vr_function();" value="音認開始">-->
     </div>
   </div>
 </div>
+
 
 <script>
 /////WebRTC関連/////
@@ -84,12 +96,25 @@ function uploaddata(){//DBのconsultation.dataにrecordedDataを書き込む。_
   $("#set_uploaddata").submit();//_uploaddata_formのinputタグをsubmitする→enterroom_consultation_path(update)→consultation.roomnumberをDBにセット
 }
 
+function videoseek(){//コメントの発話時点から録画データを再生する
+  if($("#videodata").css('display') == 'inline-block'){//録画データが表示中ならば
+    var sec = parseInt(event.target.innerHTML);//comments/_index.htmlの各コメント内の再生マークに続く発話時点（秒）を取ってくる
+    console.log(event.target.innerHTML);
+    if(sec > 0){
+      $("#videodata").get(0).currentTime = sec;//録画データの再生位置を設定
+      $("#videodata").get(0).play();//再生
+    }
+  }
+}
+
 $(window).on('turbolinks:load', function() {
   'use strict';
 
-  let localStream = null;
-  let theirStream = null;
-  let peer = null;
+  Turbolinks.clearCache();//意味ない？
+
+  let localStream = null;//自分側の動画
+  let theirStream = null;//相手側の動画
+  let peer = null;//WebRTC
   let existingCall = null;
 
   let localVideo =  document.getElementById('local_video');
@@ -106,7 +131,7 @@ $(window).on('turbolinks:load', function() {
   navigator.mediaDevices.getUserMedia({video: true, audio: true})
     .then(function (stream) {
         // Success
-        $('#my-video').get(0).srcObject = stream;
+        $('#my-video').get(0).srcObject = stream;//自分側の動画
         localStream = stream;
     }).catch(function (error) {
     // Error
@@ -125,7 +150,8 @@ $(window).on('turbolinks:load', function() {
   });
 
   peer.on('error', function(err){
-      alert(err.message);
+      //alert(err.message);
+      alert('カウンセラーが未入室です。カウンセラーの入室を待ってください。');
   });
 
   peer.on('close', function(){
@@ -134,15 +160,14 @@ $(window).on('turbolinks:load', function() {
   peer.on('disconnected', function(){
   });
 
-  $('#make-call').submit(function(e){
+  $('#make-call').submit(function(e){//相手側をコールする（ここでは相談者からカウンセラーへのコールのみ）
       e.preventDefault();
       const call = peer.call($('#callto-id').val(), localStream);
       setupCallEventHandlers(call);
   });
 
-  $('#end-call').click(function(){
+  $('#end-call').click(function(){//通話を終了する
     existingCall.close();//通話切断
-    //$('#their-video').css('background-color','#eee');
     document.getElementById('their-video').style.backgroundColor = '#eee';
     if(isConsultant){//Consultant側のクライアントでのみ実行
       stopRecord();//録画終了
@@ -174,6 +199,7 @@ $(window).on('turbolinks:load', function() {
         //通話状態になった時刻をConsultation(Event)の開始日時とし、events/timestamp_formのf.hidden_field :actual_startにセットする
         var now = new Date();
         document.getElementById('event_actual_start').value = now;//events/timestamp_formをsubmitし開始日時をDBに登録する
+        $("#set_timestamp").submit();
         startRecord();//録画を開始する
       }
       vr_function();//Consultant、Client共に音声認識を開始する（関数はevents/_form.htmlで定義）
@@ -196,13 +222,23 @@ $(window).on('turbolinks:load', function() {
   }
 
   function setupMakeCallUI(){
-    $('#make-call').show();
     $('#end-call').hide();
+    if(isConsultant){
+      $('#set_roomnumber').show();//カウンセラー向けの入室ボタン
+    }
+    else {
+      $('#make-call').show();//相談者向けの入室ボタン
+    }
   }
 
   function setupEndCallUI() {
-    $('#make-call').hide();
     $('#end-call').show();
+    if(isConsultant){
+      $('#set_roomnumber').hide();//カウンセラー向けの入室ボタン
+    }
+    else {
+      $('#make-call').hide();//相談者向けの入室ボタン
+    }
   }
 
   function startRecord(){
@@ -210,10 +246,14 @@ $(window).on('turbolinks:load', function() {
       console.warn("no stream");
       return;
     }
-    if (recorder) {
+    /*if (recorder) {
       console.warn("recorder already exist");
       return;
-    }
+    }*/
+
+    //自分側の音声を、相手側音声に合成して記録する
+    theirStream.addTrack(localStream.getAudioTracks()[0]);
+
 
     recorder = new MediaRecorder(theirStream);
     console.log("OK start recording");
@@ -223,15 +263,13 @@ $(window).on('turbolinks:load', function() {
       var videoBlob = new Blob([evt.data], { type: evt.data.type });//録画データ
       blobUrl = window.URL.createObjectURL(videoBlob);//録画データのblobUrl
 
+      //録画直後のデータをvideodata欄に表示する
       $('#their-video').hide();//相手側動画欄を非表示にして
       $('#videodata').show();//consultation.data欄を再表示
       //$('#videodata').src = blobUrl;
       document.getElementById('videodata').src = blobUrl;//メモリ上の録画データをvideodata領域にセット（上のjqueryだとうまく動かない）
 
-      //anchor.download = 'recorded.webm';//ファイル名
-      //anchor.href = blobUrl;
-
-      //録画データをbase64にしてから_uploaddata_formの#urlに渡す
+      //DBへの保存用に、録画データをbase64にしてから_uploaddata_formの#urlに渡す
       var reader = new window.FileReader();
       reader.readAsDataURL(videoBlob);
       reader.onloadend = function() {
@@ -251,5 +289,14 @@ $(window).on('turbolinks:load', function() {
       recorder.stop();
     }
   }
+
+  $(window).on('turbolinks:before-visit', function(event) {
+  	if(isConsultant && location.pathname.indexOf("/consultations/")==0){
+      document.getElementById('consultation_roomnumber').value = null;//このページからConsultantが離れる場合はroomnumberをnilにする
+      $("#set_roomnumber").submit();//_roomnumber_formのinputタグをsubmitする→enterroom_consultation_path(update)→consultation.roomnumberをDBにセット
+    }
+    return;
+  })
+
 });
 </script>

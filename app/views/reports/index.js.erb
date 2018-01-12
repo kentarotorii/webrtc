@@ -1,2 +1,4 @@
-$("#reports_area").html("<%= j(render 'reports/index', { reports: @report.consultation.reports, consultation: @report.consultation }) %>")
+$("#reports_area").html("<%= j(render 'reports/index', { reports: @report.consultation.reports.order('id DESC'), consultation: @report.consultation }) %>")
+//$("#reports_area").html("<%= j(render 'reports/index', { reports: @consultation.reports, consultation: @consultation }) %>")
 $('#report_content').val('')
+$('#report_disclose').prop('checked', false);

@@ -1,12 +1,26 @@
 // Place all the styles related to the Reports controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
-.report-text{
+.report{
   border: 1px solid #fff;
   background-color: rgba(255,255,255,0.2);
   margin-bottom: 5px;
   padding: 5px;
 }
-.report-text > p{
-    margin: 0px;
+.report-closed{
+  border: 1px solid #fff;
+  background-color: rgba(255,255,255,0.75);
+  margin-bottom: 5px;
+  padding: 5px;
+}
+
+input[type=checkbox] {
+  transform: scale(1.5);
+  display: inline-block;
+  margin: 0 15px 0 2px;
+  padding: 0;
+  vertical-align: middle;
+  position: relative;
+  top: -2px;
+  cursor: pointer;
 }

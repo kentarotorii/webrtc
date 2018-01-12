@@ -29,6 +29,10 @@ Rails.application.routes.draw do
     put :dataupload, on: :member
   end
 
+  resources :reports do
+    get :cancel, on: :member
+  end
+
   resources :users, only: [:index, :show] do
     resources :consultations do
   #    resources :comments

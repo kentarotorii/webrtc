@@ -2,7 +2,8 @@ class CarrierStringIO < StringIO
 
   def original_filename
     # the real name does not matter
-    "data.webm"
+    #"data.webm"
+    Time.now.strftime('%Y%m%d%H%M%S')+".webm"
   end
 
   def content_type

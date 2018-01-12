@@ -1,3 +1,33 @@
 // Place all the styles related to the events controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+.fc-center > h2 {
+  font-size: 1.5em;
+  position: relative;
+}
+.fc-username {
+  font-size: 1.5em;
+}
+.fc-sun {
+  color: red;
+  background-color: rgba(200,120,120,0.4);
+}
+.fc-sat {
+  color: blue;
+  background-color: rgba(120,120,200,0.4);
+}
+.fc-mon {
+  background-color: rgba(240,240,240,0.4);
+}
+.fc-tue {
+  background-color: rgba(240,240,240,0.4);
+}
+.fc-wed {
+  background-color: rgba(240,240,240,0.4);
+}
+.fc-thu {
+  background-color: rgba(240,240,240,0.4);
+}
+.fc-fri {
+  background-color: rgba(240,240,240,0.4);
+}

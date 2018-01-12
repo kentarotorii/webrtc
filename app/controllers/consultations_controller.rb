@@ -20,7 +20,7 @@ class ConsultationsController < ApplicationController
     @comment = @consultation.comments.build
     @comments = @consultation.comments.order('id DESC')
     @report = @consultation.reports.build
-    @reports = @consultation.reports
+    @reports = @consultation.reports.order('id DESC')
   end
 
   def new
@@ -39,9 +39,10 @@ class ConsultationsController < ApplicationController
     @event = Event.new(events_params)
 
     #終了予定日時は開始予定日時+15分とする
-
     if events_params[:planed_start]!=""
-      @event.planed_end = events_params[:planed_start].to_datetime + Rational(15, 24 * 60)
+      #events_params[:planed_start].to_datetimeは値は東京時間でUTC扱いになってしまうので9時間引く
+      #@event.planed_end = events_params[:planed_start].to_datetime - Rational(9, 24) + Rational(15, 24 * 60)
+      @event.planed_end = events_params[:planed_start].to_datetime - Rational(Time.zone.utc_offset(),24*60*60) + Rational(15, 24 * 60)
       #events_params[:planed_end] = (events_params[:planed_start].to_datetime + Rational(15, 24 * 60)).strftime('%Y/%m/%d %H:%M')
     end
 
@@ -79,6 +80,15 @@ class ConsultationsController < ApplicationController
 
   def confirm
     @event = Event.new(events_params)
+
+    #終了予定日時は開始予定日時+15分とする
+    if events_params[:planed_start]!=""
+      #events_params[:planed_start].to_datetimeは値は東京時間でUTC扱いになってしまうので9時間引く
+      #@event.planed_end = events_params[:planed_start].to_datetime - Rational(9, 24) + Rational(15, 24 * 60)
+      @event.planed_end = events_params[:planed_start].to_datetime - Rational(Time.zone.utc_offset(),24*60*60) + Rational(15, 24 * 60)
+      #events_params[:planed_end] = (events_params[:planed_start].to_datetime + Rational(15, 24 * 60)).strftime('%Y/%m/%d %H:%M')
+    end
+
     @consultation = @event.consultations.build(consultations_params)
     @user = User.find(@consultation.consultant_id).becomes(User)
 
@@ -89,10 +99,16 @@ class ConsultationsController < ApplicationController
   def enterroom
     respond_to do |format|
       @consultation.update(consultations_params)
-      Pusher.trigger('test_channel', 'enter_room', {
-        message: User.find(consultations_params[:consultant_id]).name+'さんが入室しました', consultaton_id: consultations_params[:id]
-      })
-      #json message =  "message": "<consultant>さんが入室しました", "consultaton_id": "<consultations_params[:id]>, "roomnumber": "<roomnumber>"
+      unless consultations_params[:roomnumber].blank?
+        #Clientへのメッセージ
+        Pusher.trigger("user_#{@consultation.client_id}_channel", 'enter_room', {
+          message: User.find(consultations_params[:consultant_id]).name+'さんが入室しました', consultaton_id: consultations_params[:id]
+        })
+        #Consultantへのメッセージ
+        Pusher.trigger("user_#{@consultation.consultant_id}_channel", 'enter_room', {
+          message: User.find(consultations_params[:client_id]).name+'さんに入室案内をしました'
+        })
+      end
       format.html {render :nothing => true}
       format.js{render :nothing => true}
     end

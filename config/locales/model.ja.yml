@@ -5,9 +5,11 @@ ja:
       contact: "お問い合わせ"
       user: "ユーザー"
     attributes:
-      topic:
-        title: "タイトル"
-        content: "内容"
+      event:
+        title: "件名"
+        planed_start: "希望日時"
+      consultation:
+        memo: "相談の内容"
       user:
         title: "タイトル"
         name: "名前"
@@ -17,5 +19,5 @@ ja:
         password: "パスワード"
         password_confirmation: "確認用パスワード"
         remember_me: "ログインを記憶"
-      message:
-        body: "メッセージ"
+      report:
+        content: "レポート"

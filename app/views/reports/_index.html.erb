@@ -1,17 +1,22 @@
-
 <% reports.each do |report| %>
-  <% unless report.id.nil? %>
+  <% if !report.id.nil? && (current_user.type=='Consultant'||report.disclose)%>
+  <!---Clientの場合は、disclose=trueのレポートだけを表示-->
+    <div class="report" id= "<%= report.id %>"><!---各レポート欄のidをレポートid（report.id）にし、edit.js.erbで指定できるようにする-->
+      <div class="left">
+        <% if !report.disclose %>
+          <i class="fa fa-lock fa-lg" style="margin:0px 5px 0px 0px"></i>
+        <% end %>
+        <strong>レポート：</strong><%= report.content %>
+      </div>
 
-    <div class="report-text">
-      <p class="left"><%= report.content %></p>
-      <p class="right">
+      <div class="right">
         <strong>報告者：</strong><%= User.find(report.user_id).name %>,
         <strong>報告日時：</strong><%= report.created_at.strftime("%Y年%m月%d日 %H時%M分") %>
         <% if current_user.id == report.user.id %>
           <%= link_to '', consultation_report_path(consultation, report), class: "fa fa-trash-o fa-lg", method: :delete, remote: true, data: { confirm: '本当に削除していいですか？' }%>
           <%= link_to '', edit_consultation_report_path(consultation, report), class: "fa fa-pencil-square-o fa-lg", remote: true%>
         <% end %>
-      </p>
+      </div>
     </div>
   <% end %>
 <% end %>

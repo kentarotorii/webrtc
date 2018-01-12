@@ -249,6 +249,18 @@ ja:
       name:
         - "#{last_name} #{first_name}"
 
+    university:
+      prefix: ["ABC大学", "XYZ大学", "西早稲田大学", "東慶応大学"]
+      name:
+        - "#{University.prefix}#{Job.field}  #{Job.education_level}"
+        - "#{University.prefix}#{Job.position}  #{Job.key_skills}"
+
+    job:
+      field: ["医学部卒業"]
+      position: ["教育学部卒業", "大学院心理学研究科修了"]
+      key_skills: ["臨床心理士"]
+      education_level: ["心療内科専門医", "精神科専門医"]
+
     lorem:
       words: ['ゴーシュは', '町の活動写真館で', 'セロを', '弾く係りでした。', 'けれども', 'あんまり', '上手でないという', '評判でした。',
             '上手でないどころではなく', '実は', '仲間の楽手のなかでは', 'いちばん', '下手でしたから、', 'いつでも', '楽長に',

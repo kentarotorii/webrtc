@@ -8,25 +8,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript" src="https://cdn.webrtc.ecl.ntt.com/skyway-latest.js"></script>
   <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
-  <% if user_signed_in? && current_user.type == 'Client' %>
+
+  <% if user_signed_in? && current_user.type == 'Client' %><!-- クライアントが通知を受信したら-->
     <script>
       var pusher = new Pusher('<%= ENV["PUSHER_KEY"] %>',{
         encrypted: true,
         cluster: 'ap1'
       });
-      var channel = pusher.subscribe('test_channel');
+      var channel = pusher.subscribe('user_<%= current_user.id %>_channel');
       channel.bind('enter_room', function(data) {
         alert(data.message);
-        location.href =　'/consultations/'+data.consultaton_id;
+        location.href =　'/consultations/'+data.consultaton_id;//面談室まで案内する
       });
     </script>
-  <% elsif user_signed_in? && current_user.type == 'Consultant' %>
+  <% elsif user_signed_in? && current_user.type == 'Consultant' %><!-- カウンセラーが通知を受信したら-->
     <script>
       var pusher = new Pusher('<%= ENV["PUSHER_KEY"] %>',{
         encrypted: true,
         cluster: 'ap1'
       });
-      var channel = pusher.subscribe('test_channel');
+      var channel = pusher.subscribe('user_<%= current_user.id %>_channel');
       channel.bind('enter_room', function(data) {
         alert(data.message);
       });
@@ -65,6 +66,7 @@
                           <% elsif current_user.type == 'Consultant'%>
                             <li><%= link_to "あなたへの相談", consultations_path %></li>
                             <li><%= link_to '相談者一覧', users_path%></li>
+                            <li><%= link_to '自分の予定', user_events_path(current_user.id)%></li>
                           <% end %>
 
                       </ul>
@@ -86,8 +88,10 @@
 <%= yield %>
 </header>
 
+<!--
 <div class='btn-top'><p><a class='fa fa-arrow-up'></a></p></div>
 <div class='btn-bottom'><p><a class='fa fa-arrow-down'></a></p></div>
+-->
 
 <footer>
 </footer>

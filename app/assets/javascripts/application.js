@@ -16,6 +16,8 @@
 //= require turbolinks
 //= require moment
 //= require moment/ja.js
+//= require fullcalendar
+//= require fullcalendar/lang/ja
 //= require bootstrap-datetimepicker
 //= require_tree .
 

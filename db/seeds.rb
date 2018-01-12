@@ -5,36 +5,14 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
-email = "consultant1@sample.com"
-password = "password"
-name = Faker::Name.name
-User.create!(email: email,
-               password: password,
-               password_confirmation: password,
-               name: name,
-               confirmed_at: Time.now,
-               confirmation_sent_at: Time.now,
-               type: 'Consultant',
-               user_type: 'Consultant'
-               )
 
-email = "client1@sample.com"
-password = "password"
-name = Faker::Name.name
-User.create!(email: email,
-              password: password,
-              password_confirmation: password,
-              name: name,
-              confirmed_at: Time.now,
-              confirmation_sent_at: Time.now,
-              type: 'Client',
-              user_type: 'Client'
-              )
 
 9.times do |n|
   email = Faker::Internet.email
   password = "password"
   name = Faker::Name.name
+  profile = Faker::University.name
+
   User.create!(email: email,
                password: password,
                password_confirmation: password,
@@ -42,7 +20,8 @@ User.create!(email: email,
                confirmed_at: Time.now,
                confirmation_sent_at: Time.now,
                type: 'Consultant',
-               user_type: 'Consultant'
+               user_type: 'Consultant',
+               profile: profile
                )
 end
 

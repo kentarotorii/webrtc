@@ -1,11 +1,18 @@
 class EventsController < ApplicationController
   before_action :authenticate_user!
+
   def index
+    @events = User.find(params[:user_id]).events.between(params['start'], params['end']) if (params['start'] && params['end']) #eventsに関するpathはuser/eventsのみ
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml { render :xml => @events }
+      format.json { render :json => @events}
+    end
   end
 
   def update
     @event = Event.find(params[:id])
-    #binding.pry
     respond_to do |format|
       @event.update(events_params)
       format.html {render :nothing => true}

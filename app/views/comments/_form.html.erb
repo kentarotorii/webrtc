@@ -11,8 +11,9 @@
     </div>
   <% end %>
   <%= f.hidden_field :consultation_id %>
+  <%= f.hidden_field :speechstart %>
   <div class="field">
-    <%= f.text_area :content, placeholder: "会話", class: "form-control"  %>
+    <%= f.text_area :content, placeholder: "相談の会話", class: "form-control"  %>
   </div>
 
   <div class="actions right" style="height:0px">
@@ -23,6 +24,7 @@
 <script>
 
 var flag_speech = 0;
+var flag_listening = 0;
 //$(document).ready( function vr_function() {//ページを開いた時点で認識を開始する場合はこっち（末尾の");"も忘れずに）
 function vr_function() {
   window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
@@ -34,6 +36,9 @@ function vr_function() {
   recognition.onsoundstart = function() {
       //document.getElementById('status').innerHTML = "認識中";
       //document.getElementById('new_comment').attr('placeholder','認識中');
+      var now = new Date();
+      document.getElementById('comment_speechstart').value = now;
+      console.log(now);
   };
   recognition.onnomatch = function() {
       //document.getElementById('status').innerHTML = "もう一度試してください";
@@ -42,13 +47,14 @@ function vr_function() {
   recognition.onerror = function() {
       //document.getElementById('status').innerHTML = "エラー";
       //document.getElementById('new_comment').attr('placeholder','エラー');
-      if(flag_speech == 0)
+      if(flag_speech == 0) {
         vr_function();
+      }
   };
   recognition.onsoundend = function() {
       //document.getElementById('new_comment').attr('placeholder','停止中');
       //document.getElementById('status').innerHTML = "停止中";
-        vr_function();
+      vr_function();
   };
   recognition.onresult = function(event) {
       var results = event.results;
@@ -65,10 +71,18 @@ function vr_function() {
               flag_speech = 1;
           }
       }
-  }
+  };
+
+  $('#end-call').click(function(){//consultations/show.htmlの退室（end-call）がクリックされたら
+    recognition.stop();//音声認識中止
+    flag_listening = 1;//以降、recognition.start()しない
+  });
+
   flag_speech = 0;
   //document.getElementById('status').innerHTML = "start";
-  recognition.start();
+  if(flag_listening == 0){
+    recognition.start();
+  }
 }
 //);
 </script>
