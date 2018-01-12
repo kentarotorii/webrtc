@@ -199,7 +199,7 @@ $(window).on('turbolinks:load', function() {
         //通話状態になった時刻をConsultation(Event)の開始日時とし、events/timestamp_formのf.hidden_field :actual_startにセットする
         var now = new Date();
         document.getElementById('event_actual_start').value = now;//events/timestamp_formをsubmitし開始日時をDBに登録する
-        $("#set_timestamp").submit();
+        //$("#set_timestamp").submit();
         startRecord();//録画を開始する
       }
       vr_function();//Consultant、Client共に音声認識を開始する（関数はevents/_form.htmlで定義）
