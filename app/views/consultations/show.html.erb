@@ -277,7 +277,7 @@ $(window).on('turbolinks:load', function() {
     var gain_node2 = audioContext.createGain();
     var biqd_filter1 = audioContext.createBiquadFilter();
     var biqd_filter2 = audioContext.createBiquadFilter();
-    var merger = audioContext.createChannelMerger(1);
+    var merger = audioContext.createChannelMerger();
     var output = audioContext.createMediaStreamDestination();
 
 
