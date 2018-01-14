@@ -299,7 +299,7 @@ $(window).on('turbolinks:load', function() {
     merger.connect(output);
 
     console.log("#############BEFORE###########"+theirStream.getAudioTracks());
-    theirStream.removeTrack(theirStream.getAudioTracks()[0]);
+    //theirStream.removeTrack(theirStream.getAudioTracks()[0]);
     theirStream.addTrack(output.stream.getAudioTracks()[0]);
     console.log("#############AFTER###########"+theirStream.getAudioTracks());
 
