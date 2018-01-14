@@ -10,7 +10,8 @@
 
                   <% if event.actual_start.present? && comment.speechstart.present? %>
                     <% if event.actual_start <= comment.speechstart %>
-                      <span class="timeofcomment fa fa-play" onclick="videoseek()"> <%= ((comment.speechstart-event.actual_start)).to_i %></span>
+                      <!--span class="timeofcomment fa fa-play" onclick="videoseek()"> <%= ((comment.speechstart-event.actual_start)).to_i %></span-->
+                      <span class="timeofcomment fa fa-play" onclick="videoseek()"> <%= comment.speechstartat %></span>
                     <% end %>
                   <% end %>
 
@@ -24,7 +25,8 @@
 
                 <% if event.actual_start.present? && comment.speechstart.present? %>
                   <% if event.actual_start <= comment.speechstart %>
-                    <span class="timeofcomment fa fa-play" onclick="videoseek()"> <%= ((comment.speechstart-event.actual_start)).to_i %></span>
+                  <!--span class="timeofcomment fa fa-play" onclick="videoseek()"> <%= ((comment.speechstart-event.actual_start)).to_i %></span-->
+                  <span class="timeofcomment fa fa-play" onclick="videoseek()"> <%= comment.speechstartat %></span>
                   <% end %>
                 <% end %>
 

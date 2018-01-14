@@ -58,15 +58,15 @@
             <ul class="nav navbar-nav navbar-right">
               <% if user_signed_in? %>
                   <li class="dropdown">
-                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">メニュー <span class="caret"></span></a>
                       <ul class="dropdown-menu">
                           <% if current_user.type == 'Client' %>
                             <li><%= link_to "あなたの相談", consultations_path %></li>
                             <li><%= link_to 'カウンセラーに相談する', users_path%></li>
                           <% elsif current_user.type == 'Consultant'%>
                             <li><%= link_to "あなたへの相談", consultations_path %></li>
-                            <li><%= link_to '相談者一覧', users_path%></li>
                             <li><%= link_to '自分の予定', user_events_path(current_user.id)%></li>
+                            <li><%= link_to '相談者一覧', users_path%></li>
                           <% end %>
 
                       </ul>

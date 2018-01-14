@@ -17,6 +17,6 @@ class CommentsController < ApplicationController
   end
 
   def comment_params
-    params.require(:comment).permit(:consultation_id, :content, :speechstart)
+    params.require(:comment).permit(:consultation_id, :content, :speechstart, :speechstartat)
   end
 end

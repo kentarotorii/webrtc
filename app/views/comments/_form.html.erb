@@ -12,6 +12,7 @@
   <% end %>
   <%= f.hidden_field :consultation_id %>
   <%= f.hidden_field :speechstart %>
+  <%= f.hidden_field :speechstartat %>
   <div class="field">
     <%= f.text_area :content, placeholder: "相談の会話", class: "form-control"  %>
   </div>
@@ -34,11 +35,11 @@ function vr_function() {
   recognition.interimResults = true;
   recognition.continuous = true;
   recognition.onsoundstart = function() {
-      //document.getElementById('status').innerHTML = "認識中";
-      //document.getElementById('new_comment').attr('placeholder','認識中');
       var now = new Date();
       document.getElementById('comment_speechstart').value = now;
-      console.log(now);
+      //WebRTCの通話開始時にevents/timestamp_formに書いた本端末でのevent_actual_startからの経過時間（秒）を、comments/formに書き込んでDBに登録する
+      document.getElementById('comment_speechstartat').value = parseInt((now - Date.parse(document.getElementById('event_actual_start').value))/1000);
+      //console.log(now - Date.parse(document.getElementById('event_actual_start').value));
   };
   recognition.onnomatch = function() {
       //document.getElementById('status').innerHTML = "もう一度試してください";
@@ -61,8 +62,8 @@ function vr_function() {
       for (var i = event.resultIndex; i < results.length; i++) {
           if (results[i].isFinal) {
               //document.getElementById('result_text').innerHTML = results.length+","+results[i][0].transcript;
-              document.getElementById('comment_content').value = results[i][0].transcript;
-              document.getElementById('comment_submit').click();
+              document.getElementById('comment_content').value = results[i][0].transcript;//認識結果を書き込んで
+              document.getElementById('comment_submit').click();//登録する
               vr_function();
           }
           else {

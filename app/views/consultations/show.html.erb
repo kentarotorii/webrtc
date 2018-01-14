@@ -14,7 +14,7 @@
             相談者：<%= User.find(@consultation.client_id).name + 'さん' %><br>
             相談の件名：<%= @consultation.event.title %><br>
             <% if  @consultation.event.actual_start? && @consultation.event.actual_end? %>
-              相談日時：<%= @consultation.event.actual_start.strftime('%Y年%m月%d日 %H:%M')%>〜<%=@consultation.event.actual_end.strftime('%H:%M')%>
+            相談日時：<%= @consultation.event.actual_start.strftime('%Y年%m月%d日 %H:%M')%>〜<%=@consultation.event.actual_end.strftime('%H:%M')%>
             <% end %>
           </div>
           <div><%= video_tag @consultation.data.url, id: "videodata", type: "video/webm", autoplay: false, controls: true, class: "their-video"%></div><!--consultation.dataの動画エリア、通話時はこちらがhidden -->
@@ -39,6 +39,7 @@
 
           <!-- CSSでデフォルトでdisplay: noneとしている。相手と繋がったら（call.on('stream'...）showが実行される -->
           <p><button id="end-call" class="btn btn-primary btn-block">退室</button></p>
+          <!-- SkyWayの確認用、非表示 -->
           <p><span id="my-id" class="invisible">...</span></p>
 
         </div>
@@ -116,10 +117,6 @@ $(window).on('turbolinks:load', function() {
   let theirStream = null;//相手側の動画
   let peer = null;//WebRTC
   let existingCall = null;
-
-  let localVideo =  document.getElementById('local_video');
-  //let playbackVideo =  document.getElementById('playback_video');
-  //let anchor = document.getElementById('downloadlink');
   let recorder =  null;
   let blobUrl = null;
 
@@ -195,14 +192,17 @@ $(window).on('turbolinks:load', function() {
       setupEndCallUI();
       theirStream = stream; //相手の動画
 
+      //通話状態になった時刻をConsultation(Event)の開始日時とし、events/timestamp_formのf.hidden_field :actual_startにセットする
+      //コメントの発話時点（speechstartat）をConsultant、Clientの双方の時刻からの経過時間として計算するため、双方でFormに書いておく
+      //ただしsubmitは、actual_endと併せ、Consultantのみで行う
+      var now = new Date();
+      document.getElementById('event_actual_start').value = now;//events/timestamp_formをsubmitし開始日時をDBに登録する
+
       if(isConsultant){//Consultant側のクライアントでのみ実行
-        //通話状態になった時刻をConsultation(Event)の開始日時とし、events/timestamp_formのf.hidden_field :actual_startにセットする
-        var now = new Date();
-        document.getElementById('event_actual_start').value = now;//events/timestamp_formをsubmitし開始日時をDBに登録する
-        //$("#set_timestamp").submit();
+      //$("#set_timestamp").submit();
         startRecord();//録画を開始する
       }
-      vr_function();//Consultant、Client共に音声認識を開始する（関数はevents/_form.htmlで定義）
+      vr_function();//Consultant、Client共に音声認識を開始する（vr_functionはcomments/_form.htmlで定義）
     });
 
     call.on('close', function(){
@@ -251,11 +251,12 @@ $(window).on('turbolinks:load', function() {
       return;
     }*/
 
-    //自分側の音声を、相手側音声に合成して記録する
+    //自分側の音声を、相手側音声に合成して記録する（→うまく行かない）
     //theirStream.addTrack(localStream.getAudioTracks()[0]);
-    //自分側の音声を、相手側音声に合成して記録する
+
+    //自分側の音声を、相手側音声に合成して記録する（→これもうまく行かない）
     ///////////////////////////////////////////
-    var AudioContext = window.AudioContext || window.webkitAudioContext;
+    /*var AudioContext = window.AudioContext || window.webkitAudioContext;
     var audioContext = new AudioContext();
     var gain_node = audioContext.createGain();
     gain_node.gain.value = 1;
@@ -263,8 +264,41 @@ $(window).on('turbolinks:load', function() {
     source.connect(gain_node);
     var output = audioContext.createMediaStreamDestination();
     gain_node.connect(output);
+    console.log("#############BEFORE###########"+theirStream.getAudioTracks());
     theirStream.addTrack(output.stream.getAudioTracks()[0]);
-    ///////////////////////////////////////////
+    console.log("#############AFTER###########"+theirStream.getAudioTracks());*/
+
+    //自分側と相手側の音声を合成して、相手側動画の音声として記録する
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
+    var audioContext = new AudioContext();
+    var source1 = audioContext.createMediaStreamSource(localStream);
+    var source2 = audioContext.createMediaStreamSource(theirStream);
+    var gain_node1 = audioContext.createGain();
+    var gain_node2 = audioContext.createGain();
+    var biqd_filter1 = audioContext.createBiquadFilter();
+    var biqd_filter2 = audioContext.createBiquadFilter();
+    var output = audioContext.createMediaStreamDestination();
+
+    gain_node1.gain.value = 1;
+    gain_node2.gain.value = 1;
+    biqd_filter1.type = 'lowpass';
+    biqd_filter1.frequency.value = 1600;
+    biqd_filter2.type = 'lowpass';
+    biqd_filter2.frequency.value = 1600;
+
+    source1.connect(gain_node1);
+    source2.connect(gain_node2);
+    //gain_node1.connect(output);
+    //gain_node2.connect(output);
+    gain_node1.connect(biqd_filter1);
+    gain_node2.connect(biqd_filter2);
+    biqd_filter1.connect(output);
+    biqd_filter2.connect(output);
+
+    console.log("#############BEFORE###########"+theirStream.getAudioTracks());
+    theirStream.removeTrack(theirStream.getAudioTracks()[0]);
+    theirStream.addTrack(output.stream.getAudioTracks()[0]);
+    console.log("#############AFTER###########"+theirStream.getAudioTracks());
 
     recorder = new MediaRecorder(theirStream);
     console.log("OK start recording");
@@ -302,7 +336,7 @@ $(window).on('turbolinks:load', function() {
   }
 
   $(window).on('turbolinks:before-visit', function(event) {
-  	if(isConsultant && location.pathname.indexOf("/consultations/")==0){
+  	if(isConsultant && location.pathname.indexOf("/consultations/")==0){//consultations/showをConsultantが開いている場合
       document.getElementById('consultation_roomnumber').value = null;//このページからConsultantが離れる場合はroomnumberをnilにする
       $("#set_roomnumber").submit();//_roomnumber_formのinputタグをsubmitする→enterroom_consultation_path(update)→consultation.roomnumberをDBにセット
     }
