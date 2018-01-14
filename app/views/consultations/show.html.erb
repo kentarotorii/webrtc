@@ -280,7 +280,6 @@ $(window).on('turbolinks:load', function() {
     var merger = audioContext.createChannelMerger();
     var output = audioContext.createMediaStreamDestination();
 
-
     gain_node1.gain.value = 1;
     gain_node2.gain.value = 1;
     biqd_filter1.type = 'lowpass';
@@ -294,11 +293,12 @@ $(window).on('turbolinks:load', function() {
     //gain_node2.connect(output);
     gain_node1.connect(biqd_filter1);
     gain_node2.connect(biqd_filter2);
-    biqd_filter1.connect(output);
-    biqd_filter2.connect(output);
+    biqd_filter1.connect(merger,0);
+    biqd_filter2.connect(merger,0);
+    merger.connect(output);
 
     console.log("#############BEFORE###########"+theirStream.getAudioTracks());
-    //theirStream.removeTrack(theirStream.getAudioTracks()[0]);
+    theirStream.removeTrack(theirStream.getAudioTracks()[0]);
     theirStream.addTrack(output.stream.getAudioTracks()[0]);
     console.log("#############AFTER###########"+theirStream.getAudioTracks());
 
