@@ -298,7 +298,7 @@ $(window).on('turbolinks:load', function() {
     merger.connect(output);
 
     console.log("#############BEFORE###########"+theirStream.getAudioTracks());
-    convertedStream = new MediaStream();
+    var convertedStream = new MediaStream();
     //theirStream.removeTrack(theirStream.getAudioTracks()[0]);
     convertedStream.addTrack(theirStream.getVideoTracks()[0]);
     convertedStream.addTrack(output.stream.getAudioTracks()[0]);
