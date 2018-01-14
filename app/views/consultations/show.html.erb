@@ -298,11 +298,13 @@ $(window).on('turbolinks:load', function() {
     merger.connect(output);
 
     console.log("#############BEFORE###########"+theirStream.getAudioTracks());
+    convertedStream = new MediaStream();
     //theirStream.removeTrack(theirStream.getAudioTracks()[0]);
-    theirStream.addTrack(output.stream.getAudioTracks()[0]);
+    convertedStream.addTrack(theirStream.getVideoTracks()[0]);
+    convertedStream.addTrack(output.stream.getAudioTracks()[0]);
     console.log("#############AFTER###########"+theirStream.getAudioTracks());
 
-    recorder = new MediaRecorder(theirStream);
+    recorder = new MediaRecorder(convertedStream);
     console.log("OK start recording");
     //console.log(localStream);
     recorder.ondataavailable = function(evt) {
