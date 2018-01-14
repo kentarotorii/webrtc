@@ -252,7 +252,7 @@ $(window).on('turbolinks:load', function() {
     }*/
 
     //自分側の音声を、相手側音声に合成して記録する（→うまく行かない）
-    theirStream.addTrack(localStream.getAudioTracks()[0]);
+    //theirStream.addTrack(localStream.getAudioTracks()[0]);
 
     //自分側の音声を、相手側音声に合成して記録する（→これもうまく行かない）
     ///////////////////////////////////////////
@@ -269,7 +269,7 @@ $(window).on('turbolinks:load', function() {
     console.log("#############AFTER###########"+theirStream.getAudioTracks());*/
 
     //自分側と相手側の音声を合成して、相手側動画の音声として記録する
-    /*var AudioContext = window.AudioContext || window.webkitAudioContext;
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
     var audioContext = new AudioContext();
     var source1 = audioContext.createMediaStreamSource(localStream);
     var source2 = audioContext.createMediaStreamSource(theirStream);
@@ -277,7 +277,9 @@ $(window).on('turbolinks:load', function() {
     var gain_node2 = audioContext.createGain();
     var biqd_filter1 = audioContext.createBiquadFilter();
     var biqd_filter2 = audioContext.createBiquadFilter();
+    var merger = audioContext.createChannelMerger(2);
     var output = audioContext.createMediaStreamDestination();
+
 
     gain_node1.gain.value = 1;
     gain_node2.gain.value = 1;
@@ -292,14 +294,15 @@ $(window).on('turbolinks:load', function() {
     //gain_node2.connect(output);
     gain_node1.connect(biqd_filter1);
     gain_node2.connect(biqd_filter2);
-    biqd_filter1.connect(output);
-    biqd_filter2.connect(output);
+    biqd_filter1.connect(merger, 0, 1);
+    biqd_filter2.connect(merger, 1, 0);
+    merger.connect(output);
 
     console.log("#############BEFORE###########"+theirStream.getAudioTracks());
     theirStream.removeTrack(theirStream.getAudioTracks()[0]);
     theirStream.addTrack(output.stream.getAudioTracks()[0]);
     console.log("#############AFTER###########"+theirStream.getAudioTracks());
-    */
+
     recorder = new MediaRecorder(theirStream);
     console.log("OK start recording");
     //console.log(localStream);
