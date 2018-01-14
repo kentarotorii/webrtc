@@ -252,7 +252,7 @@ $(window).on('turbolinks:load', function() {
     }*/
 
     //自分側の音声を、相手側音声に合成して記録する（→うまく行かない）
-    //theirStream.addTrack(localStream.getAudioTracks()[0]);
+    theirStream.addTrack(localStream.getAudioTracks()[0]);
 
     //自分側の音声を、相手側音声に合成して記録する（→これもうまく行かない）
     ///////////////////////////////////////////
@@ -269,7 +269,7 @@ $(window).on('turbolinks:load', function() {
     console.log("#############AFTER###########"+theirStream.getAudioTracks());*/
 
     //自分側と相手側の音声を合成して、相手側動画の音声として記録する
-    var AudioContext = window.AudioContext || window.webkitAudioContext;
+    /*var AudioContext = window.AudioContext || window.webkitAudioContext;
     var audioContext = new AudioContext();
     var source1 = audioContext.createMediaStreamSource(localStream);
     var source2 = audioContext.createMediaStreamSource(theirStream);
@@ -299,7 +299,7 @@ $(window).on('turbolinks:load', function() {
     theirStream.removeTrack(theirStream.getAudioTracks()[0]);
     theirStream.addTrack(output.stream.getAudioTracks()[0]);
     console.log("#############AFTER###########"+theirStream.getAudioTracks());
-
+    */
     recorder = new MediaRecorder(theirStream);
     console.log("OK start recording");
     //console.log(localStream);
