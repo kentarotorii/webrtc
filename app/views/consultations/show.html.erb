@@ -294,9 +294,8 @@ $(window).on('turbolinks:load', function() {
     //gain_node2.connect(output);
     gain_node1.connect(biqd_filter1);
     gain_node2.connect(biqd_filter2);
-    biqd_filter1.connect(merger);
-    biqd_filter2.connect(merger);
-    merger.connect(output);
+    biqd_filter1.connect(output);
+    biqd_filter2.connect(output);
 
     console.log("#############BEFORE###########"+theirStream.getAudioTracks());
     //theirStream.removeTrack(theirStream.getAudioTracks()[0]);
