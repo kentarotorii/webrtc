@@ -246,39 +246,18 @@ $(window).on('turbolinks:load', function() {
       console.warn("no stream");
       return;
     }
-    /*if (recorder) {
-      console.warn("recorder already exist");
-      return;
-    }*/
 
-    //自分側の音声を、相手側音声に合成して記録する（→うまく行かない）
-    //theirStream.addTrack(localStream.getAudioTracks()[0]);
-
-    //自分側の音声を、相手側音声に合成して記録する（→これもうまく行かない）
-    ///////////////////////////////////////////
-    /*var AudioContext = window.AudioContext || window.webkitAudioContext;
-    var audioContext = new AudioContext();
-    var gain_node = audioContext.createGain();
-    gain_node.gain.value = 1;
-    var source = audioContext.createMediaStreamSource(localStream);
-    source.connect(gain_node);
-    var output = audioContext.createMediaStreamDestination();
-    gain_node.connect(output);
-    console.log("#############BEFORE###########"+theirStream.getAudioTracks());
-    theirStream.addTrack(output.stream.getAudioTracks()[0]);
-    console.log("#############AFTER###########"+theirStream.getAudioTracks());*/
-
-    //自分側と相手側の音声を合成して、相手側動画の音声として記録する
+    //自分側と相手側の音声を合成する
     var AudioContext = window.AudioContext || window.webkitAudioContext;
     var audioContext = new AudioContext();
-    var source1 = audioContext.createMediaStreamSource(localStream);
-    var source2 = audioContext.createMediaStreamSource(theirStream);
+    var source1 = audioContext.createMediaStreamSource(localStream);//自分側音声
+    var source2 = audioContext.createMediaStreamSource(theirStream);//相手側音声
     var gain_node1 = audioContext.createGain();
     var gain_node2 = audioContext.createGain();
     var biqd_filter1 = audioContext.createBiquadFilter();
     var biqd_filter2 = audioContext.createBiquadFilter();
-    var merger = audioContext.createChannelMerger();
-    var output = audioContext.createMediaStreamDestination();
+    var merger = audioContext.createChannelMerger(2);
+    var output = audioContext.createMediaStreamDestination();//合成先
 
     gain_node1.gain.value = 1;
     gain_node2.gain.value = 1;
@@ -289,24 +268,18 @@ $(window).on('turbolinks:load', function() {
 
     source1.connect(gain_node1);
     source2.connect(gain_node2);
-    //gain_node1.connect(output);
-    //gain_node2.connect(output);
     gain_node1.connect(biqd_filter1);
     gain_node2.connect(biqd_filter2);
     biqd_filter1.connect(merger,0);
-    biqd_filter2.connect(merger,0);
+    biqd_filter2.connect(merger,1);
     merger.connect(output);
 
-    console.log("#############BEFORE###########"+theirStream.getAudioTracks());
-    var convertedStream = new MediaStream();
-    //theirStream.removeTrack(theirStream.getAudioTracks()[0]);
+    var convertedStream = new MediaStream();//録画用ストリーム＝相手側動画＋相手側音声＋自分側音声
     convertedStream.addTrack(theirStream.getVideoTracks()[0]);
     convertedStream.addTrack(output.stream.getAudioTracks()[0]);
-    console.log("#############AFTER###########"+theirStream.getAudioTracks());
 
     recorder = new MediaRecorder(convertedStream);
-    console.log("OK start recording");
-    //console.log(localStream);
+
     recorder.ondataavailable = function(evt) {
       console.log("data available, start playback");
       var videoBlob = new Blob([evt.data], { type: evt.data.type });//録画データ
